@@ -32,6 +32,7 @@ button:hover{background:#8b1111}.center{position:absolute;left:50%;transform:tra
     <button class="mbtn" id="attackBtn" aria-label="Удар">УДАР</button>
   </div>
 </div>
+<button id="endMobileBtn" style="display:none;position:fixed;left:50%;bottom:18%;transform:translateX(-50%);z-index:80;font-size:20px;padding:14px 24px;">ВЫБОР ПЕРСОНАЖА</button>
 <div id="rotateHint">ПОВЕРНИ ТЕЛЕФОН ГОРИЗОНТАЛЬНО<br><br>↻</div>
 <script>
 const C=document.getElementById('c'),X=C.getContext('2d');X.imageSmoothingEnabled=false;
@@ -56,8 +57,8 @@ function cover(im){if(!im.complete)return;let r=Math.max(C.width/im.width,C.heig
 function pixText(t,x,y,size,align='center'){X.font=`900 ${size}px "Courier New"`;X.textAlign=align;X.fillStyle='#000';X.fillText(t,x+4,y+4);X.fillStyle='#fff';X.fillText(t,x,y)}
 function say(f,n){let a=phrases[n];f.phrase=a[Math.floor(Math.random()*a.length)];f.phraseT=2.4;
  if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(f.phrase);u.lang='ru-RU';u.rate=.95;u.pitch=1;u.volume=.85;speechSynthesis.speak(u)}}
-function selectScreen(){scene='select';start.style.display='none';title.style.display='block';title.textContent='ВЫБЕРИ БОЙЦА';title.style.fontSize='54px';sub.style.display='block';sub.textContent='← → ДВИЖЕНИЕ • ↑ ПРЫЖОК • ↓ ПРИСЕСТЬ • ЛКМ УДАР';cards.style.display='flex';cards.innerHTML='';for(const n of names){let d=document.createElement('div');d.className='card';d.innerHTML=`<img src="assets/chars/${enc(n)}/idle.png"><b>${n}</b>`;d.onclick=()=>beginFight(n);cards.appendChild(d)}music('select')}
-function beginFight(n){player=n;let pool=names.filter(x=>x!==n);enemy=pool[Math.floor(Math.random()*pool.length)];p=resetF(280);e=resetF(1000);roundOver=false;botT=1;sayT=1.5;scene='fight';cards.style.display='none';title.style.display='none';sub.style.display='none';music(Math.random()<.5?'fight1':'fight2')}
+function selectScreen(){scene='select';document.getElementById('endMobileBtn').style.display='none';start.style.display='none';title.style.display='block';title.textContent='ВЫБЕРИ БОЙЦА';title.style.fontSize='54px';sub.style.display='block';sub.textContent='← → ДВИЖЕНИЕ • ↑ ПРЫЖОК • ↓ ПРИСЕСТЬ • ЛКМ УДАР';cards.style.display='flex';cards.innerHTML='';for(const n of names){let d=document.createElement('div');d.className='card';d.innerHTML=`<img src="assets/chars/${enc(n)}/idle.png"><b>${n}</b>`;d.onclick=()=>beginFight(n);cards.appendChild(d)}music('select')}
+function beginFight(n){document.getElementById('endMobileBtn').style.display='none';player=n;let pool=names.filter(x=>x!==n);enemy=pool[Math.floor(Math.random()*pool.length)];p=resetF(280);e=resetF(1000);roundOver=false;botT=1;sayT=1.5;scene='fight';cards.style.display='none';title.style.display='none';sub.style.display='none';music(Math.random()<.5?'fight1':'fight2')}
 function attackFlip(name,isLeft){ // requested character-specific source orientation corrections
  if(name==='Боря') return !isLeft; // Boris flips on right
  return isLeft; // Marina, Grisha, Masha flip on left
@@ -83,6 +84,7 @@ function strike(a,b,aName,aLeft){if(a.actT>0||a.stun>0||a.jump||roundOver)return
   if(b.hp<=0){b.state='down';roundOver=true}
  }}
 start.onclick=selectScreen;
+document.getElementById('endMobileBtn').onclick=()=>selectScreen();
 addEventListener('keydown',ev=>{keys[ev.code]=true;if(scene==='fight'){
  if(ev.code==='ArrowUp'&&!p.jump&&p.stun<=0){p.jump=true;p.vy=-650}
  if(ev.code==='ArrowDown'&&!p.jump&&p.stun<=0&&p.actT<=0)p.state='crouch';
@@ -198,6 +200,7 @@ function drawF(f,n,isLeft){
  }
 }
 function bars(){X.fillStyle='#090909';X.fillRect(40,30,470,42);X.fillRect(770,30,470,42);X.strokeStyle='#fff';X.lineWidth=4;X.strokeRect(40,30,470,42);X.strokeRect(770,30,470,42);X.fillStyle='#d51b1b';X.fillRect(46,36,458*p.hp/100,30);X.fillRect(776,36,458*e.hp/100,30);pixText(player,45,102,24,'left');pixText(enemy,1235,102,24,'right');pixText('VS',640,68,32)}
-function draw(){X.clearRect(0,0,C.width,C.height);document.getElementById('mobile').style.visibility=scene==='fight'?'visible':'hidden';if(scene==='title')cover(BG.title);else if(scene==='select'){cover(BG.select);X.fillStyle='rgba(0,0,0,.3)';X.fillRect(0,0,C.width,C.height)}else{cover(Math.floor(Date.now()/25000)%2?BG.a1:BG.a2);X.fillStyle='rgba(0,0,0,.12)';X.fillRect(0,0,C.width,C.height);bars();drawF(p,player,true);drawF(e,enemy,false);if(roundOver){X.fillStyle='rgba(0,0,0,.58)';X.fillRect(0,0,C.width,C.height);pixText(p.hp>0?'ПОБЕДА!':'ПОРАЖЕНИЕ!',640,310,72);pixText('ENTER — ВЫБОР ПЕРСОНАЖА',640,380,26)}}requestAnimationFrame(draw)}
+function draw(){X.clearRect(0,0,C.width,C.height);document.getElementById('mobile').style.visibility=scene==='fight'?'visible':'hidden';if(scene==='title')cover(BG.title);else if(scene==='select'){cover(BG.select);X.fillStyle='rgba(0,0,0,.3)';X.fillRect(0,0,C.width,C.height)}else{cover(Math.floor(Date.now()/25000)%2?BG.a1:BG.a2);X.fillStyle='rgba(0,0,0,.12)';X.fillRect(0,0,C.width,C.height);bars();drawF(p,player,true);drawF(e,enemy,false);if(roundOver){X.fillStyle='rgba(0,0,0,.58)';X.fillRect(0,0,C.width,C.height);pixText(p.hp>0?'ПОБЕДА!':'ПОРАЖЕНИЕ!',640,310,72);pixText(matchMedia('(pointer:coarse)').matches?'НАЖМИ КНОПКУ НИЖЕ':'ENTER — ВЫБОР ПЕРСОНАЖА',640,380,26);
+if(matchMedia('(pointer:coarse)').matches)document.getElementById('endMobileBtn').style.display='block'}}requestAnimationFrame(draw)}
 let last=performance.now();function loop(t){let dt=Math.min(.033,(t-last)/1000);last=t;update(dt);requestAnimationFrame(loop)}draw();requestAnimationFrame(loop);
 </script></body></html>
