@@ -1,206 +1,155 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Семейная Драмма</title><style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#fff;font-family:"Courier New",monospace;image-rendering:pixelated}
-canvas{width:100vw;height:100vh;display:block;image-rendering:pixelated}
-#ui{position:fixed;inset:0;pointer-events:none}button{pointer-events:auto;font:900 26px "Courier New";color:#fff;background:#151515;border:5px solid #eee;box-shadow:6px 6px 0 #000;padding:14px 32px;text-transform:uppercase}
-button:hover{background:#8b1111}.center{position:absolute;left:50%;transform:translateX(-50%);bottom:10%}
-#cards{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);display:none;gap:18px;pointer-events:auto}
-.card{width:160px;height:210px;background:#111;border:5px solid #ddd;position:relative;overflow:hidden;cursor:pointer;box-shadow:7px 7px 0 #000}
-.card:hover{border-color:#ffe900;transform:translateY(-5px)}.card img{width:100%;height:165px;object-fit:contain}.card b{display:block;text-align:center;font-size:20px;background:#000;padding:8px}
-#title{position:absolute;top:12%;width:100%;text-align:center;text-shadow:6px 6px #000;font-weight:900;font-size:clamp(40px,8vw,100px);letter-spacing:4px}
-#sub{position:absolute;top:29%;width:100%;text-align:center;font-size:20px;text-shadow:3px 3px #000}
-
-#mobile{display:none;position:fixed;inset:0;pointer-events:none;z-index:30;touch-action:none}
-.pad,.actions{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:10px;pointer-events:auto}
-.pad{left:max(14px,env(safe-area-inset-left));align-items:flex-end}.actions{right:max(14px,env(safe-area-inset-right));align-items:flex-end}
-.mbtn{width:72px;height:72px;padding:0;border:4px solid #fff;background:rgba(10,10,10,.68);color:#fff;font:900 34px "Courier New";box-shadow:4px 4px 0 #000;touch-action:none;user-select:none;-webkit-user-select:none}
-.mbtn:active,.mbtn.on{background:#8b1111;transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-#attackBtn{width:96px;height:96px;border-radius:50%;font-size:18px;background:rgba(145,18,18,.78)}
-#crouchBtn,#jumpBtn{font-size:26px}
-#rotateHint{display:none;position:fixed;inset:0;z-index:100;background:#050505;color:#fff;align-items:center;justify-content:center;text-align:center;padding:28px;font:900 22px "Courier New";pointer-events:none}
-@media (pointer:coarse),(max-width:900px){#mobile{display:block}#cards{gap:8px;max-width:94%;flex-wrap:wrap;justify-content:center}.card{width:110px;height:150px}.card img{height:110px}.card b{font-size:15px;padding:5px}#title{top:6%;font-size:clamp(30px,8vw,64px)!important}#sub{top:20%;font-size:13px}.center{bottom:12%;font-size:20px;padding:12px 24px}}
-@media (orientation:portrait) and (pointer:coarse){#rotateHint{display:flex}}
-</style></head><body><canvas id="c" width="1280" height="720"></canvas><div id="ui"><div id="title">СЕМЕЙНАЯ ДРАММА</div><div id="sub">8-BIT FAMILY FIGHT</div><button id="start" class="center">НАЧАТЬ</button><div id="cards"></div></div>
-<div id="mobile">
-  <div class="pad">
-    <button class="mbtn" id="leftBtn" aria-label="Влево">←</button>
-    <button class="mbtn" id="downBtn" aria-label="Присесть">↓</button>
-    <button class="mbtn" id="rightBtn" aria-label="Вправо">→</button>
-  </div>
-  <div class="actions">
-    <button class="mbtn" id="jumpBtn" aria-label="Прыжок">↑</button>
-    <button class="mbtn" id="attackBtn" aria-label="Удар">УДАР</button>
-  </div>
-</div>
-<button id="endMobileBtn" style="display:none;position:fixed;left:50%;bottom:18%;transform:translateX(-50%);z-index:80;font-size:20px;padding:14px 24px;">ВЫБОР ПЕРСОНАЖА</button>
-<div id="rotateHint">ПОВЕРНИ ТЕЛЕФОН ГОРИЗОНТАЛЬНО<br><br>↻</div>
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Семейная Драмма — Большое приключение</title>
+<style>
+html,body{margin:0;background:#05070a;color:#fff;font-family:Arial;overflow:hidden;touch-action:none}canvas{display:block;width:100vw;height:100vh;background:#168ef0}
+#menu{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:5}
+.card{background:#111e;border:2px solid #fff;padding:18px;max-width:680px;text-align:center}button{font-size:18px;padding:10px 16px;margin:5px}
+#touch{display:none;position:fixed;inset:0;pointer-events:none;z-index:4}.tb{position:absolute;width:64px;height:64px;border-radius:50%;border:2px solid #fff8;background:#1119;color:#fff;font-size:25px;pointer-events:auto}
+#L{left:18px;bottom:25px}#R{left:92px;bottom:25px}#D{left:55px;bottom:98px}#J{right:22px;bottom:28px}#A{right:96px;bottom:28px}#S{right:59px;bottom:104px}
+#net{position:fixed;right:8px;top:8px;background:#0009;padding:7px;font-size:12px;z-index:3}
+@media(pointer:coarse),(max-width:900px){#touch{display:block}}
+</style></head><body>
+<canvas id="c" width="1280" height="720"></canvas>
+<div id="net">СЕТЬ: <span id="netState">OFFLINE</span></div>
+<div id="menu"><div class="card"><h1>СЕМЕЙНАЯ ДРАММА</h1><p>Огромный уровень · горы · пропасти · дробовик · дракон</p>
+<div id="chars"></div><p>← → ходьба · ↓ присесть · ↑/SPACE прыжок · F кувалда · G дробовик</p>
+<button id="start">СТАРТ</button><button id="online">СЕТЕВАЯ ИГРА</button>
+<p style="font-size:13px">Для игры по сети запускай через server.js. Второй игрок открывает адрес компьютера в браузере.</p></div></div>
+<div id="touch"><button class="tb" id="L">←</button><button class="tb" id="R">→</button><button class="tb" id="D">↓</button><button class="tb" id="J">↑</button><button class="tb" id="A">F</button><button class="tb" id="S">G</button></div>
 <script>
-const C=document.getElementById('c'),X=C.getContext('2d');X.imageSmoothingEnabled=false;
-const title=document.getElementById('title'),sub=document.getElementById('sub'),start=document.getElementById('start'),cards=document.getElementById('cards');
-const names=['Марина','Боря','Гриша','Маша'], enc=s=>encodeURI(s);
-const img=p=>{let i=new Image;i.src=p;return i};
-const BG={title:img('assets/bg/title.png'),select:img('assets/bg/select.png'),a1:img('assets/bg/arena1.png'),a2:img('assets/bg/arena2.png')};
-const CH={};for(const n of names){CH[n]={};for(const st of ['idle','hit','crouch','down'])CH[n][st]=img(`assets/chars/${enc(n)}/${st}.png`)}
-const AU={title:new Audio('assets/audio/title.mp3'),select:new Audio('assets/audio/select.mp3'),fight1:new Audio('assets/audio/fight1.mp3'),fight2:new Audio('assets/audio/fight2.mp3'),hit:new Audio('assets/audio/hit.mp3')};
-for(const a of Object.values(AU)){a.preload='auto'} AU.title.loop=AU.select.loop=AU.fight1.loop=AU.fight2.loop=true;
-const phrases={
- 'Марина':['Боря ёб твою мать!','Да заткнитесь вы уже!','Как вы уже достали гавкать!','У тебя всё нормально с головой?','Скотина такая!','Я тебе погавкаю!'],
- 'Гриша':['Компьютер!','Хочу видеокарту!','Опять Windows поломался!','Я не смотрю на флюгер!','Я не смотрю новости!','Ахахаах, а ты куда собрался, Бармалей?'],
- 'Боря':['Тю, так а шо?','Да не пил я, ты шо!','Я к Валерке!','Минералки хочется!','Марин, а что там есть вкусненькое?','Ну шо вы, кабаны!','Ну шо ты, кабан!','Мммммм!'],
- 'Маша':['Буся!','Ты ел сегодня?','Почему ты не ешь, я кому готовлю?','Мика насрала!','Вставай, разберём дом, заново построим!']
-};
-let scene='title',player=null,enemy=null,roundOver=false,botT=1.2,sayT=2;
-let p={},e={},keys={};
-function resetF(x,hp=100){return{x,hp,state:'idle',actT:0,stun:0,vy:0,jump:false,phrase:'',phraseT:0,hitFlash:0,knock:false,kx:0,space:false,spacePhase:0,spin:0}}
-function music(k){for(const [n,a] of Object.entries(AU))if(n!=='hit'){a.pause();a.currentTime=0}let a=AU[k];a.volume=.38;a.play().catch(()=>{})}
-function cover(im){if(!im.complete)return;let r=Math.max(C.width/im.width,C.height/im.height),w=im.width*r,h=im.height*r;X.drawImage(im,(C.width-w)/2,(C.height-h)/2,w,h)}
-function pixText(t,x,y,size,align='center'){X.font=`900 ${size}px "Courier New"`;X.textAlign=align;X.fillStyle='#000';X.fillText(t,x+4,y+4);X.fillStyle='#fff';X.fillText(t,x,y)}
-function say(f,n){let a=phrases[n];f.phrase=a[Math.floor(Math.random()*a.length)];f.phraseT=2.4;
- if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(f.phrase);u.lang='ru-RU';u.rate=.95;u.pitch=1;u.volume=.85;speechSynthesis.speak(u)}}
-function selectScreen(){scene='select';document.getElementById('endMobileBtn').style.display='none';start.style.display='none';title.style.display='block';title.textContent='ВЫБЕРИ БОЙЦА';title.style.fontSize='54px';sub.style.display='block';sub.textContent='← → ДВИЖЕНИЕ • ↑ ПРЫЖОК • ↓ ПРИСЕСТЬ • ЛКМ УДАР';cards.style.display='flex';cards.innerHTML='';for(const n of names){let d=document.createElement('div');d.className='card';d.innerHTML=`<img src="assets/chars/${enc(n)}/idle.png"><b>${n}</b>`;d.onclick=()=>beginFight(n);cards.appendChild(d)}music('select')}
-function beginFight(n){document.getElementById('endMobileBtn').style.display='none';player=n;let pool=names.filter(x=>x!==n);enemy=pool[Math.floor(Math.random()*pool.length)];p=resetF(280);e=resetF(1000);roundOver=false;botT=1;sayT=1.5;scene='fight';cards.style.display='none';title.style.display='none';sub.style.display='none';music(Math.random()<.5?'fight1':'fight2')}
-function attackFlip(name,isLeft){ // requested character-specific source orientation corrections
- if(name==='Боря') return !isLeft; // Boris flips on right
- return isLeft; // Marina, Grisha, Masha flip on left
+const C=document.getElementById('c'),X=C.getContext('2d'),W=1280,H=720,WORLD=560000,FINISH=WORLD-1200;
+const chars=['Боря','Гриша','Марина','Маша'],imgs={},keys={};let chosen='Боря',run=false,cam=0,last=0,score=0,won=false;
+for(const n of chars){imgs[n]={};for(const k of ['idle','crouch','hit','down']){let im=new Image();im.src='assets/chars/'+n+'/'+k+'.png';imgs[n][k]=im}}
+const SHOT=new Image();SHOT.src='assets/ultra/shotgun.png';
+const HAM=new Image();HAM.src='assets/level1/weapon.png';
+const enemyPaths=["assets/ultra/enemy_0.png", "assets/ultra/enemy_2.png", "assets/ultra/enemy_3.png", "assets/ultra/enemy_6.png", "assets/ultra/enemy_7.png", "assets/ultra/enemy_8.png", "assets/ultra/enemy_10.png", "assets/ultra/enemy_11.png"],enemyImgs=enemyPaths.map(q=>{let i=new Image();i.src=q;return i});
+const bossImg=new Image();bossImg.src="assets/ultra/enemy_5.png";
+const magmaImg=new Image();magmaImg.src="assets/ultra/enemy_1.png";
+const musics=["assets/ultra/music_0.mp3", "assets/ultra/music_1.mp3", "assets/ultra/music_2.mp3", "assets/ultra/music_3.mp3", "assets/ultra/music_4.mp3", "assets/ultra/music_5.mp3", "assets/ultra/music_6.mp3", "assets/ultra/music_7.mp3", "assets/ultra/music_8.mp3", "assets/ultra/music_9.mp3"].map(q=>new Audio(q)); const bossMusic=new Audio("assets/ultra/music_6.mp3");
+const sndJump=new Audio('assets/ultra/jump.mp3'),sndHit=new Audio('assets/ultra/hit.mp3'),sndSpit=new Audio('assets/ultra/spit.mp3');
+function snd(a){try{a.currentTime=0;a.play()}catch(e){}}
+document.getElementById('chars').innerHTML=chars.map(n=>`<button data-c="${n}">${n}</button>`).join('');
+document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{chosen=b.dataset.c;document.querySelectorAll('[data-c]').forEach(x=>x.style.outline='');b.style.outline='3px solid #ffd43b'});
+let p={x:180,y:400,w:105,h:170,vy:0,on:false,face:1,crouch:false,hp:5,inv:0,hammer:true,shotgun:false};
+let remote={active:false,x:0,y:0,w:105,h:170,face:1,crouch:false,name:'Игрок 2'};
+let ws=null,online=false;
+function connectNet(){
+ try{ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);
+ ws.onopen=()=>{online=true;document.getElementById('netState').textContent='ONLINE'};
+ ws.onmessage=e=>{try{let d=JSON.parse(e.data);if(d.type==='state')Object.assign(remote,d.state,{active:true})}catch(_){}};
+ ws.onclose=()=>{online=false;remote.active=false;document.getElementById('netState').textContent='OFFLINE'}}catch(e){}
 }
-function strike(a,b,aName,aLeft){if(a.actT>0||a.stun>0||a.jump||roundOver)return;a.state='hit';a.actT=.30;
- // crouching opponent ducks under standing punch
- if(Math.abs(a.x-b.x)<180 && b.state!=='crouch' && !b.knock){
-  b.hp=Math.max(0,b.hp-12); b.hitFlash=.20; b.state='idle';
-  // Independent combat rolls: 15% stun, 20% knockback.
-  if(Math.random()<.15)b.stun=1.0;
-  let special=Math.random();
-  if(special<.05 && b.hp>0){
-    // 5% comedy "to space": huge vertical launch, rotation, head-first return.
-    b.space=true; b.spacePhase=1; b.knock=true; b.jump=true;
-    b.vy=-1500; b.kx=(b.x>=a.x?1:-1)*(470+Math.random()*100); b.spin=0;
-  }else if(special<.25 && b.hp>0){
-    // 20% normal knockback, stronger than v3.
-    b.knock=true; b.jump=true; b.vy=-650;
-    b.kx=(b.x>=a.x?1:-1)*(500+Math.random()*120);
-  }
-  AU.hit.pause();AU.hit.currentTime=0;AU.hit.volume=.7;AU.hit.play().catch(()=>{});
-  if(Math.random()<.55)say(a,aName);
-  if(b.hp<=0){b.state='down';roundOver=true}
- }}
-start.onclick=selectScreen;
-document.getElementById('endMobileBtn').onclick=()=>selectScreen();
-addEventListener('keydown',ev=>{keys[ev.code]=true;if(scene==='fight'){
- if(ev.code==='ArrowUp'&&!p.jump&&p.stun<=0){p.jump=true;p.vy=-650}
- if(ev.code==='ArrowDown'&&!p.jump&&p.stun<=0&&p.actT<=0)p.state='crouch';
- if(roundOver&&ev.code==='Enter')selectScreen();
-} if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(ev.code))ev.preventDefault()});
-addEventListener('keyup',ev=>{keys[ev.code]=false;if(ev.code==='ArrowDown'&&p.hp>0&&!p.jump&&p.actT<=0)p.state='idle'});
-C.addEventListener('mousedown',ev=>{if(ev.button===0&&scene==='fight')strike(p,e,player,true)});
-function bindHold(id,code){
- const b=document.getElementById(id); if(!b)return;
- const on=ev=>{ev.preventDefault();keys[code]=true;b.classList.add('on');
-   if(code==='ArrowUp'&&scene==='fight'&&!p.jump&&p.stun<=0){p.jump=true;p.vy=-650}
-   if(code==='ArrowDown'&&scene==='fight'&&!p.jump&&p.stun<=0&&p.actT<=0)p.state='crouch';
- };
- const off=ev=>{ev.preventDefault();keys[code]=false;b.classList.remove('on');
-   if(code==='ArrowDown'&&scene==='fight'&&p.hp>0&&!p.jump&&p.actT<=0)p.state='idle';
- };
- b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off);
-}
-bindHold('leftBtn','ArrowLeft');bindHold('rightBtn','ArrowRight');bindHold('downBtn','ArrowDown');bindHold('jumpBtn','ArrowUp');
-const attackBtn=document.getElementById('attackBtn');
-attackBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();attackBtn.classList.add('on');if(scene==='fight')strike(p,e,player,true)});
-for(const t of ['pointerup','pointercancel','pointerleave'])attackBtn.addEventListener(t,ev=>{ev.preventDefault();attackBtn.classList.remove('on')});
-document.addEventListener('contextmenu',ev=>{if(matchMedia('(pointer:coarse)').matches)ev.preventDefault()});
-document.addEventListener('touchmove',ev=>{if(scene==='fight')ev.preventDefault()},{passive:false});
-function updateOne(f,dt){
- if(f.actT>0){f.actT-=dt;if(f.actT<=0&&f.hp>0&&!f.jump)f.state='idle'}
- if(f.stun>0)f.stun=Math.max(0,f.stun-dt);
- if(f.hitFlash>0)f.hitFlash=Math.max(0,f.hitFlash-dt);
- if(f.phraseT>0)f.phraseT-=dt;
+document.getElementById('online').onclick=()=>{connectNet();startGame()};
+document.getElementById('start').onclick=startGame;
+function startGame(){document.getElementById('menu').style.display='none';run=true;playZoneMusic(0)}
+let currentMusic=-1;
+function playZoneMusic(z){if(z===currentMusic)return;musics.forEach(a=>a.pause());bossMusic.pause();currentMusic=z;if(z===99)bossMusic.play().catch(()=>{});else if(musics.length)musics[z%musics.length].play().catch(()=>{})}
 
- if(f.space){
-   f.spin += 6.2*dt;
-   f.x += f.kx*dt;
-   f.kx *= Math.pow(.38,dt);
-   f.vy += 1150*dt;
-   f.y=(f.y||0)+f.vy*dt;
-   // allow fighter to travel far above screen, then return head-first
-   if(f.vy>0)f.spacePhase=2;
-   if(f.y>=0 && f.spacePhase===2){
-     f.y=0;f.vy=0;f.jump=false;f.knock=false;f.space=false;f.spacePhase=0;
-     f.kx=0;f.spin=0;f.stun=.55;if(f.hp>0)f.state='idle';
+// 100x longer than the original ~5600px prototype.
+const platforms=[],deco=[],enemies=[],pickups=[];
+function add(x,y,w,h,t='ground'){platforms.push([x,y,w,h,t])}
+function terrain(){
+ let seed=1234567;const rnd=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+ const section=2000,sections=Math.ceil(WORLD/section);
+ for(let s=0;s<sections;s++){
+   const x=s*section,prog=x/WORLD,mode=s%6;
+   if(mode===0){ // rolling land
+     add(x,570,650,150);add(x+650,535,500,185);add(x+1150,500,500,220);add(x+1650,550,350,170);
+   }else if(mode===1){ // repeated pits
+     add(x,570,380,150);add(x+520,570,360,150);add(x+1030,540,340,180);add(x+1510,570,490,150);
+     add(x+390,455,120,25,'plat');add(x+890,430,125,25,'plat');add(x+1380,450,120,25,'plat');
+   }else if(mode===2||mode===5){ // huge climbable mountain
+     add(x,570,260,150);
+     let step=mode===2?85:70, count=10;
+     for(let i=0;i<count;i++)add(x+260+i*step,570-(i+1)*42,step+8,150+(i+1)*42,'rock');
+     for(let i=count-1;i>=0;i--)add(x+260+(count+(count-1-i))*step,570-(i+1)*42,step+8,150+(i+1)*42,'rock');
+     add(x+260+count*2*step,570,2000-(260+count*2*step),150);
+   }else if(mode===3){ // long ravine with platforms
+     add(x,570,300,150);add(x+1700,570,300,150);
+     for(let i=0;i<9;i++)add(x+330+i*155,500-(i%3)*65,115,24,'plat');
+   }else{ // terraces
+     add(x,570,400,150);add(x+400,510,400,210);add(x+800,450,400,270);add(x+1200,510,400,210);add(x+1600,570,400,150);
    }
-   f.x=Math.max(85,Math.min(1195,f.x));
-   return;
+   // decorative clumps
+   for(let k=0;k<5;k++)deco.push({x:x+100+rnd()*1800,y:0,s:.5+rnd()*.8,type:(s+k)%3});
+   // enemy count grows toward finish
+   let count=1+Math.floor(prog*6);
+   for(let k=0;k<count;k++){
+     let ex=x+350+rnd()*1400;
+     enemies.push({x:ex,y:250,w:70+prog*35,h:70+prog*35,v:(rnd()<.5?-1:1)*(28+prog*55),alive:true,hp:1+Math.floor(prog*3),t:1+rnd()*2,img:enemyImgs[(s+k)%Math.max(1,enemyImgs.length)]});
+   }
+   if(s===Math.floor(sections*.20))pickups.push({x:x+500,y:420,type:'shotgun',taken:false});
  }
- if(f.knock){f.x+=f.kx*dt;f.kx*=Math.pow(.22,dt);f.x=Math.max(70,Math.min(1210,f.x))}
- if(f.jump){f.vy+=1700*dt;f.y=(f.y||0)+f.vy*dt;if(f.y>=0){f.y=0;f.vy=0;f.jump=false;f.knock=false;f.kx=0;if(f.hp>0)f.state='idle'}}
+ // final arena
+ add(FINISH-500,570,2500,150,'rock');
 }
-function update(dt){if(scene!=='fight')return;updateOne(p,dt);updateOne(e,dt);if(roundOver)return;
- let mv=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);
- if(p.stun<=0&&!p.jump&&p.actT<=0&&p.state!=='crouch')p.x+=mv*245*dt;
- // hard collision: fighters can never pass through one another
- const minGap=125;p.x=Math.max(70,Math.min(p.x,e.x-minGap));e.x=Math.max(p.x+minGap,Math.min(1210,e.x));
- botT-=dt;
- if(e.stun<=0&&!e.jump&&!e.knock&&e.actT<=0){
-   let gap=e.x-p.x;
-   // Bot changes intent instead of permanently walking straight at player.
-   if(!e.aiMode || e.aiModeT<=0){
-     let r=Math.random();
-     e.aiMode=r<.46?'approach':r<.64?'wait':r<.80?'retreat':r<.91?'crouch':'jump';
-     e.aiModeT=.35+Math.random()*1.15;
-   }
-   e.aiModeT-=dt;
-   if(e.aiMode==='approach'&&gap>150)e.x-= (75+Math.random()*55)*dt;
-   else if(e.aiMode==='retreat'&&gap<330)e.x+=(70+Math.random()*50)*dt;
-   else if(e.aiMode==='crouch'&&!e.jump)e.state='crouch';
-   else if(e.aiMode==='jump'&&!e.jump){e.jump=true;e.vy=-600;e.aiMode='wait'}
-   else if(e.state==='crouch'&&e.aiMode!=='crouch')e.state='idle';
-   e.x=Math.max(p.x+minGap,Math.min(1210,e.x));
-   if(botT<=0){
-     botT=.45+Math.random()*1.45;
-     let d=e.x-p.x;
-     if(d<195 && e.state!=='crouch' && Math.random()<.78)strike(e,p,enemy,false);
-     else if(d>210 && Math.random()<.35){e.aiMode='approach';e.aiModeT=.5+Math.random()}
-   }
- }
- sayT-=dt;if(sayT<=0){sayT=5+Math.random()*7;if(Math.random()<.5)say(p,player);else say(e,enemy)}
-}
-function fighter(im,x,y,h,flip=false){if(!im||!im.complete)return;let r=h/im.height,w=im.width*r;X.save();if(flip){X.translate(x*2,0);X.scale(-1,1)}X.drawImage(im,x-w/2,y-h,w,h);X.restore()}
-function drawF(f,n,isLeft){
- let st=f.state,im=CH[n][st]||CH[n].idle;let flip=false;
- if(st==='hit')flip=attackFlip(n,isLeft);else flip=!isLeft;
- let baseH=n==='Гриша'&&st==='idle'?535:480;
- let yy=690+(f.y||0), h=st==='down'?280:baseH;
+terrain();
+const boss={x:FINISH+400,y:240,w:330,h:260,hp:35,max:35,alive:true,t:1};
+let bullets=[],shots=[];
+function topAt(x,w,feet=800,maxDrop=800){let top=Infinity;for(const a of platforms)if(x+w>a[0]&&x<a[0]+a[2]&&a[1]>=feet-maxDrop&&a[1]<=feet+maxDrop&&a[1]<top)top=a[1];return top}
+function snapEnemy(e){let t=topAt(e.x,e.w,e.y+e.h,500);if(t<Infinity)e.y=t-e.h}
+enemies.forEach(snapEnemy);
+function rect(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function jump(){if(p.on){p.vy=-720;p.on=false;snd(sndJump)}}
+let atk=0,atkCd=0,shotCd=0;
+function hammerAttack(){if(p.hammer&&atkCd<=0){atk=.22;atkCd=.35}}
+function shoot(){if(!p.shotgun||shotCd>0)return;shotCd=.45;shots.push({x:p.x+(p.face>0?p.w:0),y:p.y+65,vx:p.face*620,vy:0,r:13,life:2})}
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyF','KeyG'].includes(e.code))e.preventDefault();keys[e.code]=true;if(!e.repeat&&(e.code==='ArrowUp'||e.code==='Space'))jump();if(!e.repeat&&e.code==='KeyF')hammerAttack();if(!e.repeat&&e.code==='KeyG')shoot()});
+addEventListener('keyup',e=>keys[e.code]=false);
+function touch(id,code,action){let b=document.getElementById(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[code]=true;if(action)action()});['pointerup','pointercancel','pointerleave'].forEach(k=>b.addEventListener(k,e=>{keys[code]=false}))}
+touch('L','ArrowLeft');touch('R','ArrowRight');touch('D','ArrowDown');touch('J','ArrowUp',jump);touch('A','KeyF',hammerAttack);touch('S','KeyG',shoot);
 
- // During 5% space launch rotate whole fighter; on descent he is upside-down/head-first.
- X.save();
- if(f.space){
-   X.translate(f.x,yy-h/2);
-   let ang=f.spacePhase===2?Math.PI+Math.sin(f.spin)*.18:f.spin;
-   X.rotate(ang);
-   fighter(im,0,h/2,h,flip);
- }else fighter(im,f.x,yy,h,flip);
- X.restore();
-
- // Damage feedback: RED HEAD ONLY, not the whole body.
- if(f.hitFlash>0){
-   let headY=yy-h*.84;
-   X.save();
-   X.globalAlpha=.58;
-   X.fillStyle='#ff1818';
-   X.beginPath();
-   X.ellipse(f.x,headY,h*.085,h*.105,0,0,Math.PI*2);
-   X.fill();
-   X.restore();
+function bulletTerrain(x0,y0,x1,y1,r){let n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/6));for(let j=1;j<=n;j++){let t=j/n,x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;for(const a of platforms)if(x+r>a[0]&&x-r<a[0]+a[2]&&y+r>a[1]&&y-r<a[1]+a[3])return true}return false}
+function hurt(){if(p.inv>0)return;p.hp--;p.inv=1.2;snd(sndHit);if(p.hp<=0){p.hp=5;p.x=Math.max(180,cam+100);p.y=250;p.vy=0}}
+function update(dt){
+ if(!run||won)return;p.inv=Math.max(0,p.inv-dt);atk=Math.max(0,atk-dt);atkCd=Math.max(0,atkCd-dt);shotCd=Math.max(0,shotCd-dt);
+ let feet=p.y+p.h,want=!!keys.ArrowDown;
+ if(want&&!p.crouch){p.crouch=true;p.h=105;p.y=feet-105}
+ else if(!want&&p.crouch){let ny=feet-170,block=platforms.some(a=>p.x+p.w>a[0]&&p.x<a[0]+a[2]&&ny<a[1]+a[3]&&feet-4>a[1]);if(!block){p.crouch=false;p.h=170;p.y=ny}}
+ let mv=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);if(mv){p.face=mv;p.x+=mv*(p.crouch?125:215)*dt}
+ let oy=p.y,ob=p.y+p.h;p.vy+=1850*dt;p.y+=p.vy*dt;p.on=false;
+ for(const a of platforms){if(p.x+p.w<=a[0]||p.x>=a[0]+a[2]||p.y+p.h<=a[1]||p.y>=a[1]+a[3])continue;
+   if(p.vy>=0&&ob<=a[1]+7){p.y=a[1]-p.h;p.vy=0;p.on=true}else if(p.vy<0&&oy>=a[1]+a[3]-7){p.y=a[1]+a[3];p.vy=20}else if(mv>0)p.x=a[0]-p.w;else if(mv<0)p.x=a[0]+a[2];
  }
- if(f.stun>0){pixText('★ STUN ★',f.x,yy-baseH-18,20)}
- if(f.space){pixText('🚀',f.x,Math.max(125,yy-h-28),28)}
- if(f.phraseT>0&&f.phrase){
-   let fs=18;X.font=`900 ${fs}px "Courier New"`;
-   let w=Math.min(520,X.measureText(f.phrase).width+26),bx=Math.max(5,Math.min(C.width-w-5,f.x-w/2)),by=Math.max(115,yy-baseH-75);
-   X.fillStyle='rgba(0,0,0,.82)';X.fillRect(bx,by,w,42);X.strokeStyle='#fff';X.strokeRect(bx,by,w,42);pixText(f.phrase,bx+w/2,by+28,fs)
- }
+ if(p.y>780){p.x=Math.max(180,p.x-500);p.y=150;p.vy=0;hurt()}
+ for(const q of pickups)if(!q.taken&&rect(p,{x:q.x,y:q.y,w:90,h:60})){q.taken=true;if(q.type==='shotgun')p.shotgun=true}
+ let prog=p.x/WORLD;playZoneMusic(p.x>FINISH-1000?99:Math.min(musics.length-1,Math.floor(prog*Math.max(1,musics.length))));
+ // hammer hitbox
+ if(atk>.08&&atk<.17){let hb={x:p.face>0?p.x+p.w-5:p.x-120,y:p.y+20,w:120,h:p.h-25};for(const e of enemies)if(e.alive&&rect(hb,e)){e.hp--;if(e.hp<=0){e.alive=false;score+=100}}if(boss.alive&&rect(hb,boss))boss.hp--}
+ // enemies near player only
+ for(const e of enemies)if(e.alive&&Math.abs(e.x-p.x)<1500){let nx=e.x+e.v*dt,t=topAt(nx,e.w,e.y+e.h,90);if(t===Infinity||t<e.y+e.h-48)e.v*=-1;else{e.x=nx;e.y=t-e.h}e.t-=dt;if(e.t<=0&&Math.abs(e.x-p.x)<650){e.t=.8+Math.random()*1.8;snd(sndSpit);let dx=p.x-e.x,dy=p.y-e.y,l=Math.hypot(dx,dy)||1;bullets.push({x:e.x,y:e.y+30,vx:dx/l*280,vy:dy/l*280,r:11,life:4})}if(rect(p,e))hurt()}
+ // boss
+ if(p.x>FINISH-1500&&boss.alive){boss.t-=dt;if(boss.t<=0){boss.t=.65;let dx=p.x-boss.x,dy=p.y-boss.y,l=Math.hypot(dx,dy)||1;bullets.push({x:boss.x+40,y:boss.y+100,vx:dx/l*390,vy:dy/l*390,r:22,life:5,boss:true})}}
+ for(const b of bullets){let nx=b.x+b.vx*dt,ny=b.y+b.vy*dt;if(bulletTerrain(b.x,b.y,nx,ny,b.r)){b.life=0;continue}b.x=nx;b.y=ny;b.life-=dt;if(rect(p,{x:b.x-b.r,y:b.y-b.r,w:b.r*2,h:b.r*2})){b.life=0;hurt()}}bullets=bullets.filter(b=>b.life>0);
+ for(const b of shots){let nx=b.x+b.vx*dt,ny=b.y;if(bulletTerrain(b.x,b.y,nx,ny,b.r)){b.life=0;continue}b.x=nx;b.life-=dt;for(const e of enemies)if(e.alive&&rect({x:b.x-b.r,y:b.y-b.r,w:b.r*2,h:b.r*2},e)){e.hp-=2;b.life=0;if(e.hp<=0){e.alive=false;score+=150}}if(boss.alive&&rect({x:b.x-b.r,y:b.y-b.r,w:b.r*2,h:b.r*2},boss)){boss.hp-=2;b.life=0}}shots=shots.filter(b=>b.life>0);
+ if(boss.hp<=0&&boss.alive){boss.alive=false;won=true;musics.forEach(a=>a.pause());bossMusic.pause()}
+ cam=Math.max(0,Math.min(WORLD-W,p.x-380));
+ if(online&&ws&&ws.readyState===1)ws.send(JSON.stringify({type:'state',state:{x:p.x,y:p.y,w:p.w,h:p.h,face:p.face,crouch:p.crouch,name:chosen}}));
 }
-function bars(){X.fillStyle='#090909';X.fillRect(40,30,470,42);X.fillRect(770,30,470,42);X.strokeStyle='#fff';X.lineWidth=4;X.strokeRect(40,30,470,42);X.strokeRect(770,30,470,42);X.fillStyle='#d51b1b';X.fillRect(46,36,458*p.hp/100,30);X.fillRect(776,36,458*e.hp/100,30);pixText(player,45,102,24,'left');pixText(enemy,1235,102,24,'right');pixText('VS',640,68,32)}
-function draw(){X.clearRect(0,0,C.width,C.height);document.getElementById('mobile').style.visibility=scene==='fight'?'visible':'hidden';if(scene==='title')cover(BG.title);else if(scene==='select'){cover(BG.select);X.fillStyle='rgba(0,0,0,.3)';X.fillRect(0,0,C.width,C.height)}else{cover(Math.floor(Date.now()/25000)%2?BG.a1:BG.a2);X.fillStyle='rgba(0,0,0,.12)';X.fillRect(0,0,C.width,C.height);bars();drawF(p,player,true);drawF(e,enemy,false);if(roundOver){X.fillStyle='rgba(0,0,0,.58)';X.fillRect(0,0,C.width,C.height);pixText(p.hp>0?'ПОБЕДА!':'ПОРАЖЕНИЕ!',640,310,72);pixText(matchMedia('(pointer:coarse)').matches?'НАЖМИ КНОПКУ НИЖЕ':'ENTER — ВЫБОР ПЕРСОНАЖА',640,380,26);
-if(matchMedia('(pointer:coarse)').matches)document.getElementById('endMobileBtn').style.display='block'}}requestAnimationFrame(draw)}
-let last=performance.now();function loop(t){let dt=Math.min(.033,(t-last)/1000);last=t;update(dt);requestAnimationFrame(loop)}draw();requestAnimationFrame(loop);
+function drawTerrain(a){let sx=a[0]-cam;if(sx+a[2]<0||sx>W)return;let rock=a[4]==='rock';X.fillStyle=rock?'#69665f':'#73502f';X.fillRect(sx,a[1],a[2],a[3]);X.fillStyle=rock?'#8d8981':'#4f922f';X.fillRect(sx,a[1],a[2],rock?7:12);if(!rock){X.fillStyle='#74b844';X.fillRect(sx,a[1],a[2],4)}}
+function draw(){
+ X.clearRect(0,0,W,H);
+ let prog=cam/WORLD,sky=X.createLinearGradient(0,0,0,H);sky.addColorStop(0,prog>.66?'#54305f':'#0d91f5');sky.addColorStop(1,prog>.66?'#e17855':'#bce7ff');X.fillStyle=sky;X.fillRect(0,0,W,H);
+ // distant mountain parallax
+ X.fillStyle='#315f78';X.beginPath();X.moveTo(0,560);for(let x=0;x<=W;x+=90)X.lineTo(x,400-Math.abs(Math.sin((x+cam*.08)*.006))*230);X.lineTo(W,720);X.closePath();X.fill();
+ for(const a of platforms)drawTerrain(a);
+ // simple vegetation volume
+ for(const d of deco){let sx=d.x-cam;if(sx<-120||sx>W+120)continue;let top=topAt(d.x,30,700,700);if(top===Infinity)continue;X.fillStyle=d.type===0?'#2f7f29':d.type===1?'#478d2e':'#617348';for(let k=0;k<5;k++){X.beginPath();X.ellipse(sx+(k-2)*10,top-18-(k%2)*10,8,24,(k-2)*.25,0,Math.PI*2);X.fill()}if(d.type===2){X.fillStyle='#77736c';X.beginPath();X.ellipse(sx+25,top-8,18,9,0,0,Math.PI*2);X.fill()}}
+ for(const q of pickups)if(!q.taken)X.drawImage(SHOT,q.x-cam,q.y,100,65);
+ for(const e of enemies)if(e.alive&&e.x-cam>-150&&e.x-cam<W+150)X.drawImage(e.img,e.x-cam,e.y,e.w,e.h);
+ if(boss.alive&&boss.x-cam>-400&&boss.x-cam<W+400)X.drawImage(bossImg,boss.x-cam,boss.y,boss.w,boss.h);
+ for(const b of bullets){if(b.boss&&magmaImg.complete)X.drawImage(magmaImg,b.x-cam-b.r,b.y-b.r,b.r*2,b.r*2);else{X.fillStyle='#6d4b2e';X.beginPath();X.arc(b.x-cam,b.y,b.r,0,Math.PI*2);X.fill()}}
+ for(const b of shots){let g=X.createRadialGradient(b.x-cam-4,b.y-4,2,b.x-cam,b.y,b.r);g.addColorStop(0,'#fff');g.addColorStop(.35,'#ffd44a');g.addColorStop(1,'#d26900');X.fillStyle=g;X.beginPath();X.arc(b.x-cam,b.y,b.r,0,Math.PI*2);X.fill()}
+ function drawPlayer(o,name,alpha=1){let im=imgs[name]?.[o.crouch?'crouch':'idle']||imgs[chosen].idle,sx=o.x-cam;X.save();X.globalAlpha=alpha;if(o.face<0){X.translate(sx+o.w,0);X.scale(-1,1);sx=0}X.drawImage(im,sx,o.y,o.w,o.h);X.restore()}
+ drawPlayer(p,chosen,p.inv>0&&Math.floor(p.inv*12)%2?.45:1);
+ if(remote.active)drawPlayer(remote,remote.name in imgs?remote.name:'Гриша',.8);
+ // Correct hammer hold: pivot at hand, handle starts in hand instead of floating.
+ if(p.hammer){let hx=p.x-cam+(p.face>0?p.w*.72:p.w*.28),hy=p.y+(p.crouch?55:82);X.save();X.translate(hx,hy);if(p.face<0)X.scale(-1,1);let swing=atk>0?(-1.15+(0.22-atk)/.22*1.55):-.38;X.rotate(swing);X.drawImage(HAM,-18,-18,105,72);X.restore()}
+ if(p.shotgun){let sx=p.x-cam+(p.face>0?p.w*.58:p.w*.42),sy=p.y+(p.crouch?45:72);X.save();X.translate(sx,sy);if(p.face<0)X.scale(-1,1);X.rotate(-.08);X.drawImage(SHOT,-18,-20,120,72);X.restore()}
+ X.fillStyle='#000b';X.fillRect(15,15,610,74);X.fillStyle='#fff';X.font='bold 22px Arial';X.fillText(`${chosen}  ЖИЗНИ ${p.hp}  ОПЫТ ${score}`,28,45);X.font='16px Arial';X.fillText(`ПУТЬ ${(p.x/WORLD*100).toFixed(1)}%  |  F КУВАЛДА  ${p.shotgun?'| G ДРОБОВИК':''}`,28,72);
+ if(p.x>FINISH-1500&&boss.alive){X.fillStyle='#000c';X.fillRect(W/2-260,20,520,38);X.fillStyle='#e33';X.fillRect(W/2-250,30,500*(boss.hp/boss.max),18);X.strokeStyle='#fff';X.strokeRect(W/2-250,30,500,18)}
+ if(won){X.fillStyle='#000c';X.fillRect(0,0,W,H);X.fillStyle='#ffe33d';X.textAlign='center';X.font='bold 86px Arial';X.fillText('МОЛОДЕЦ!',W/2,H/2);X.font='28px Arial';X.fillStyle='#fff';X.fillText('ДРАКОН ПОБЕЖДЁН',W/2,H/2+55);X.textAlign='left'}
+}
+function loop(t){let dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 </script></body></html>
